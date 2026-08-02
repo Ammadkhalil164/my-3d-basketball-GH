@@ -1,0 +1,1597 @@
+I will start by listing the contents of the workspace directory to understand the structure of the project.
+
+Listed directory bb%203d%20shreyas%20raj%20github
+
+I will list the contents of the `src` directory to see what source files are available in this project.
+
+Listed directory src
+
+I will examine the `index.html` file in the workspace to understand the structure of the webpage.
+
+Viewed index.html:1-331
+
+I will read the contents of `src/main.js` to see how the 3D scene, rendering, animations, interactivity, and transitions are implemented.
+
+Viewed main.js:1-318
+
+I will read the contents of `src/style.css` to inspect the layout, CSS variables, glassmorphic card layers, styling for interactive components, layout utilities, and responsiveness.
+
+Viewed style.css:1-800
+
+I will read the remaining lines of `src/style.css` to see the rest of the media queries and mobile layout definitions.
+
+Viewed style.css:801-908
+
+I will view the `package.json` file to identify the precise versions of the key libraries used, including Three.js, GSAP, and Vite.
+
+Viewed package.json:1-19
+
+I will read `vite.config.js` to see if there is any custom asset loading or server configuration.
+
+Viewed vite.config.js:1-9
+
+I will list the `public` directory to see if there are other assets, like favicon or models.
+
+Listed directory public
+
+I will list the `public/models` directory.
+
+Listed directory models
+
+Here is a complete, detailed **one-shot prompt** you can copy and paste into any AI coding assistant to recreate this exact website from scratch.
+
+***
+
+# 📋 Copy-Paste One-Shot Prompt
+
+```markdown
+Create a highly interactive, premium 3D landing page called "Y68° — Find Your Street Ballers" (a street sports network matching site) using Vanilla HTML, CSS, JavaScript, Three.js, GSAP (with ScrollTrigger), and Vite as the bundler.
+
+The site features a fixed-background interactive 3D basketball model that responds to scroll positions (repositioning and scaling itself to align with the layout of each section) and supports natural inertia-based drag-spinning in the hero section.
+
+Below are the exact specifications, configurations, and full-source codes required to build the site.
+
+---
+
+### 1. Project Directory Structure
+Create the following file structure:
+├── index.html
+├── vite.config.js
+├── package.json
+├── public/
+│   ├── favicon.svg
+│   └── models/
+│       └── basketball.glb   <-- (Use a high-quality GLTF/GLB basketball model)
+└── src/
+    ├── main.js
+    └── style.css
+
+---
+
+### 2. File Contents
+
+#### A. [package.json]
+```json
+{
+  "name": "basketball3d",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.176.0",
+    "gsap": "^3.12.5"
+  },
+  "devDependencies": {
+    "vite": "^8.0.12"
+  }
+}
+```
+
+#### B. [vite.config.js]
+```javascript
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  assetsInclude: ['**/*.glb'],
+  server: {
+    port: 3001,
+  },
+});
+```
+
+#### C. [index.html]
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Y68° — Find Your Street Ballers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+
+  <!-- Screen texture overlay -->
+  <div class="noise-overlay"></div>
+
+  <!-- Global liquid-glass SVG distortion filter -->
+  <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+    <defs>
+      <filter id="lg-distort" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.004 0.008" numOctaves="1" result="turbulence"/>
+        <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="35" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <span class="nav-logo">Y68°</span>
+    <div class="nav-links">
+      <a href="#hero-section" class="nav-link">Play</a>
+      <a href="#stats-section" class="nav-link">Leaderboard</a>
+      <a href="#how-section" class="nav-link">How it works</a>
+      <a href="#site-footer" class="nav-link">About</a>
+    </div>
+    <button class="profile-btn glass-pill">
+      <span class="pulse-dot"></span> My profile
+    </button>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="section hero-section" id="hero-section">
+    <canvas id="hero-canvas"></canvas>
+
+    <!-- Product Hunt badge -->
+    <div class="ph-badge-wrap" id="ph-badge">
+      <a href="https://www.producthunt.com" target="_blank" class="ph-badge-inner glass-card">
+        <svg width="32" height="32" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="120" cy="120" r="120" fill="#FF6154"/>
+          <path fill="#fff" d="M144.2 113.4c0 13.8-11.2 25-25 25H96v-50h23.2c13.8 0 25 11.2 25 25zm-25-41.7H79.7v96.6h16.7V155h22.8c22.9 0 41.5-18.6 41.5-41.5s-18.6-41.8-41.5-41.8z"/>
+        </svg>
+        <div class="ph-badge-text">
+          <span class="ph-label">#1 Product of the Day</span>
+          <span class="ph-sub">Product Hunt</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Event card — 3-layer liquid glass (bend / face / edge) -->
+    <div class="event-card" id="event-card">
+      <div class="ec-bend"></div>
+      <div class="ec-face"></div>
+      <div class="ec-edge"></div>
+
+      <div class="ec-content">
+        <div class="ec-image">
+          <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=560&q=80" alt="Street court game" />
+          <div class="ec-img-shade"></div>
+          <div class="ec-img-top">
+            <span class="ec-time-pill">12 min from</span>
+            <span class="ec-home-pill"><span class="home-dot"></span>Home</span>
+          </div>
+          <div class="ec-img-bottom">
+            <h3 class="ec-title">Boooys night out</h3>
+            <p class="ec-date">May 12, 9 PM</p>
+          </div>
+        </div>
+
+        <div class="ec-organizer">
+          <div class="org-av grad-1"></div>
+          <div class="org-info">
+            <span class="org-name">Matthew Walker</span>
+            <span class="org-role">organizer</span>
+          </div>
+          <div class="ec-players">
+            <div class="av-stack">
+              <div class="mini-av grad-2"></div>
+              <div class="mini-av grad-3"></div>
+              <div class="mini-av grad-4"></div>
+            </div>
+            <span class="plus-badge">+3</span>
+          </div>
+        </div>
+
+        <div class="ec-venue">
+          <span class="venue-name">Shōten</span>
+          <span class="venue-addr">123 Sakura Park,<br>Sakyo-ku, Kyoto</span>
+        </div>
+
+        <button class="ec-btn ghost-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Check on map
+        </button>
+        <button class="ec-btn dark-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Join game
+        </button>
+        <p class="ec-free">✓ Free event</p>
+      </div>
+    </div>
+
+    <!-- Hero text -->
+    <div class="hero-text" id="hero-text">
+      <span class="hero-eyebrow">JOIN GAME</span>
+      <h1 class="hero-headline">
+        <span class="hl-line">FIND YOUR</span>
+        <span class="hl-line">STREET</span>
+        <span class="hl-line">BALLERS</span>
+      </h1>
+      <p class="hero-brand">Y68°</p>
+      <div class="hero-pricing glass-pill">
+        <span class="price-amount">$100</span>
+        <span class="price-sep">/</span>
+        <span class="price-label">Early Access</span>
+        <button class="price-cta">Get In →</button>
+      </div>
+    </div>
+
+    <!-- Animated Signature -->
+    <div class="signature-wrap" id="sig-wrap">
+      <svg class="sig-svg" viewBox="0 0 160 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 45 C20 10, 35 50, 50 20 C65 -10, 70 55, 90 30 C110 5, 120 50, 140 35 C150 28, 155 38, 150 45"
+              stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="sp1"/>
+        <path d="M85 30 C95 25, 105 40, 100 48"
+              stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round" class="sp2"/>
+        <path d="M10 48 C30 46, 50 50, 70 47"
+              stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round" class="sp3"/>
+      </svg>
+    </div>
+
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>scroll</span>
+    </div>
+    <div class="drag-hint">↔ drag to spin</div>
+    <button class="nav-arrow-btn glass-pill" id="nav-arrow">›</button>
+  </section>
+
+  <!-- STATS + LEADERBOARD SECTION -->
+  <section class="section stats-section" id="stats-section">
+    <div class="stats-bg-text">STAT</div>
+
+    <div class="stats-left">
+      <span class="section-eyebrow">By The Numbers</span>
+      <h2 class="section-headline">THE STREETS<br>ARE ALIVE.</h2>
+      <p class="section-body">From Tokyo to London, Lagos to NYC — ballers are running Y68° games every single day.</p>
+
+      <div class="stats-grid">
+        <div class="stat-card glass-card">
+          <span class="stat-num">24K+</span>
+          <span class="stat-label">Active Ballers</span>
+          <span class="stat-delta up">↑ +12% this month</span>
+        </div>
+        <div class="stat-card glass-card">
+          <span class="stat-num">840</span>
+          <span class="stat-label">Games This Week</span>
+          <span class="stat-delta up">↑ +8% vs last week</span>
+        </div>
+        <div class="stat-card glass-card">
+          <span class="stat-num">62</span>
+          <span class="stat-label">Cities Worldwide</span>
+          <span class="stat-delta neutral">→ 5 new this quarter</span>
+        </div>
+        <div class="stat-card glass-card">
+          <span class="stat-num">4.9★</span>
+          <span class="stat-label">Avg Game Rating</span>
+          <span class="stat-delta up">↑ Consistent</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS SECTION -->
+  <section class="section how-section" id="how-section">
+    <div class="how-bg-text">PLAY</div>
+    <div class="how-ball-zone" id="how-ball-zone"></div>
+    <div class="how-content">
+      <span class="section-eyebrow">HOW IT WORKS</span>
+      <h2 class="section-headline">THREE STEPS<br>TO THE COURT</h2>
+      <div class="steps-list">
+        <div class="step-item glass-card" id="step-1">
+          <div class="step-number">01</div>
+          <div class="step-info">
+            <h3 class="step-title">Find a Game</h3>
+            <p class="step-desc">Browse live and upcoming street games near you. Filter by skill level, location, or time slot.</p>
+          </div>
+          <div class="step-arrow">→</div>
+        </div>
+        <div class="step-item glass-card" id="step-2">
+          <div class="step-number">02</div>
+          <div class="step-info">
+            <h3 class="step-title">Join or Create</h3>
+            <p class="step-desc">Tap to join instantly or spin up your own game in under 30 seconds. Set rules, capacity, and skill tier.</p>
+          </div>
+          <div class="step-arrow">→</div>
+        </div>
+        <div class="step-item glass-card" id="step-3">
+          <div class="step-number">03</div>
+          <div class="step-info">
+            <h3 class="step-title">Build Your Rep</h3>
+            <p class="step-desc">Every game earns you points. Climb the city leaderboard, unlock badges, get scouted.</p>
+          </div>
+          <div class="step-arrow">→</div>
+        </div>
+      </div>
+      <div class="cta-row">
+        <button class="cta-main-btn">Get on the Court →</button>
+        <div class="ph-embed glass-pill">
+          <svg width="18" height="18" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="120" cy="120" r="120" fill="#DA552F"/>
+            <path d="M138 120h-28V90h28a15 15 0 010 30zm0-50h-48v100h20v-30h28a35 35 0 000-70z" fill="#fff"/>
+          </svg>
+          <div class="ph-embed-text">
+            <span class="ph-embed-label">Featured on</span>
+            <span class="ph-embed-name">Product Hunt</span>
+          </div>
+          <span class="ph-embed-score">#1</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer" id="site-footer">
+    <div class="footer-bg-ball"></div>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-logo">Y68°</div>
+          <p class="footer-tagline">The world's most premium<br>street volleyball network.</p>
+          <div class="footer-socials">
+            <a href="#" class="social-pill glass-pill">𝕏 Twitter</a>
+            <a href="#" class="social-pill glass-pill">▶ Instagram</a>
+            <a href="#" class="social-pill glass-pill">in LinkedIn</a>
+          </div>
+        </div>
+
+        <div class="footer-links-grid">
+          <div class="footer-col">
+            <span class="footer-col-title">Product</span>
+            <a href="#" class="footer-link">Find Games</a>
+            <a href="#" class="footer-link">Leaderboard</a>
+            <a href="#" class="footer-link">Court Map</a>
+            <a href="#" class="footer-link">Create Event</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-col-title">Community</span>
+            <a href="#" class="footer-link">Players</a>
+            <a href="#" class="footer-link">Teams</a>
+            <a href="#" class="footer-link">Tournaments</a>
+            <a href="#" class="footer-link">Rankings</a>
+          </div>
+          <div class="footer-col">
+            <span class="footer-col-title">Company</span>
+            <a href="#" class="footer-link">About</a>
+            <a href="#" class="footer-link">Blog</a>
+            <a href="#" class="footer-link">Press Kit</a>
+            <a href="#" class="footer-link">Contact</a>
+          </div>
+        </div>
+
+        <div class="footer-newsletter">
+          <span class="newsletter-title">Stay in the game</span>
+          <p class="newsletter-desc">Drop your email. Get notified when games go live near you.</p>
+          <div class="newsletter-input-row">
+            <input type="email" placeholder="your@email.com" class="newsletter-input"/>
+            <button class="newsletter-btn">→</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-bottom-left">
+          <span class="footer-copy">© 2026 Y68° Street Volleyball. All rights reserved.</span>
+          <div class="footer-legal">
+            <a href="#" class="legal-link">Privacy</a>
+            <span class="sep">·</span>
+            <a href="#" class="legal-link">Terms</a>
+            <span class="sep">·</span>
+            <a href="#" class="legal-link">Cookies</a>
+          </div>
+        </div>
+        <div class="footer-ph-badge">
+          <svg width="16" height="16" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="120" cy="120" r="120" fill="#DA552F"/>
+            <path d="M138 120h-28V90h28a15 15 0 010 30zm0-50h-48v100h20v-30h28a35 35 0 000-70z" fill="#fff"/>
+          </svg>
+          <span>Product of the Day #1</span>
+        </div>
+        <div class="footer-cities">
+          <span class="cities-label">COURTS ACTIVE IN</span>
+          <div class="cities-scroll">
+            <span>TOKYO · KYOTO · OSAKA · SEOUL · DUBAI · NYC · LONDON · PARIS · MUMBAI · SYDNEY ·&nbsp;</span>
+            <span aria-hidden="true">TOKYO · KYOTO · OSAKA · SEOUL · DUBAI · NYC · LONDON · PARIS · MUMBAI · SYDNEY ·&nbsp;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+```
+
+#### D. [src/style.css]
+```css
+/* =============================================
+   RESET & ROOT
+   ============================================= */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --cream: #f0ece4;
+  --cream-mid: #e8e3d9;
+  --cream-deep: #d9d3c7;
+  --ink: #0f0f0f;
+  --ink-soft: #1a1a1a;
+  --ink-muted: #555;
+  --ink-faint: #999;
+  --white: #ffffff;
+  --accent: #ff6b00;
+  --gold: #f4c430;
+  --silver: #c0c0c0;
+  --bronze: #cd7f32;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --glass-bg: rgba(255,255,255,0.45);
+  --glass-blur: blur(24px) saturate(180%);
+  --glass-border: 1px solid rgba(255,255,255,0.65);
+  --glass-shadow:
+    inset 3px 3px 3px rgba(255,255,255,0.45),
+    inset -3px -3px 3px rgba(255,255,255,0.45),
+    0 8px 32px rgba(0,0,0,0.08),
+    0 2px 8px rgba(0,0,0,0.04);
+  --glass-dark-bg: rgba(10,10,10,0.72);
+  --glass-dark-blur: blur(24px) saturate(160%);
+  --glass-dark-border: 1px solid rgba(255,255,255,0.07);
+  --glass-dark-shadow:
+    inset 2px 2px 2px rgba(255,255,255,0.05),
+    inset -2px -2px 2px rgba(255,255,255,0.05),
+    0 20px 60px rgba(0,0,0,0.35);
+}
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* =============================================
+   NOISE OVERLAY
+   ============================================= */
+.noise-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  pointer-events: none; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px; mix-blend-mode: multiply;
+}
+
+/* =============================================
+   GLASS UTILITIES
+   ============================================= */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.glass-dark {
+  background: var(--glass-dark-bg);
+  backdrop-filter: var(--glass-dark-blur);
+  -webkit-backdrop-filter: var(--glass-dark-blur);
+  border: var(--glass-dark-border);
+  box-shadow: var(--glass-dark-shadow);
+  color: #fff;
+}
+.glass-pill {
+  background: rgba(255,255,255,0.75);
+  backdrop-filter: blur(16px) saturate(200%);
+  -webkit-backdrop-filter: blur(16px) saturate(200%);
+  border: 1px solid rgba(255,255,255,0.8);
+  box-shadow: inset 2px 2px 2px rgba(255,255,255,0.6), 0 4px 16px rgba(0,0,0,0.05);
+}
+
+/* =============================================
+   NAVBAR
+   ============================================= */
+.navbar {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  display: flex; align-items: center; gap: 0.25rem;
+  width: max-content; max-width: calc(100vw - 2rem);
+  padding: 0.55rem 0.7rem 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(32px) saturate(220%);
+  -webkit-backdrop-filter: blur(32px) saturate(220%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,0.85),
+    inset 0 -1px 0 rgba(255,255,255,0.25),
+    0 8px 32px rgba(0,0,0,0.07),
+    0 2px 8px rgba(0,0,0,0.04);
+  transition: background 0.4s var(--ease-out), box-shadow 0.4s;
+}
+.navbar.scrolled {
+  background: rgba(240, 236, 228, 0.72);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,0.85),
+    0 8px 32px rgba(0,0,0,0.09);
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 1.3rem; letter-spacing: 3px; color: var(--ink);
+  opacity: 0; transform: translateY(-8px);
+  padding-right: 0.9rem;
+  margin-right: 0.4rem;
+  border-right: 1px solid rgba(0,0,0,0.1);
+  white-space: nowrap;
+}
+.nav-links {
+  display: flex; align-items: center; gap: 0.25rem;
+  opacity: 0; transform: translateY(-8px);
+}
+.nav-link {
+  padding: 0.45rem 1.1rem; border-radius: 999px;
+  font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+  color: var(--ink-muted); text-decoration: none;
+  transition: all 0.2s var(--ease-out);
+  letter-spacing: 0.2px;
+}
+.nav-link:hover {
+  background: rgba(0,0,0,0.07); color: var(--ink);
+}
+.profile-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0.45rem 1.2rem; border-radius: 999px; border: none;
+  font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+  color: var(--ink); cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  opacity: 0; transform: translateY(-8px);
+}
+.profile-btn:hover { background: var(--ink) !important; color: #fff !important; }
+.pulse-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #22c55e; display: inline-block;
+  animation: pulse-ring 2s infinite;
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+  70%  { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+
+/* =============================================
+   THREE.JS CANVAS
+   ============================================= */
+#hero-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 2;
+  pointer-events: none;
+}
+#hero-canvas.drag-enabled { pointer-events: all; cursor: grab; }
+#hero-canvas.drag-enabled:active { cursor: grabbing; }
+
+.drag-hint {
+  position: absolute; bottom: 5.5rem; left: 50%; transform: translateX(-50%);
+  font-size: 0.58rem; font-weight: 600; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--ink-faint);
+  opacity: 0; animation: fadeInUp 0.6s var(--ease-out) 2.5s forwards;
+  z-index: 10; pointer-events: none;
+}
+
+/* =============================================
+   SECTIONS — BASE
+   ============================================= */
+.section {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.section-eyebrow {
+  display: block;
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--ink-muted); margin-bottom: 0.8rem;
+}
+.section-headline {
+  font-family: var(--font-display);
+  font-size: clamp(3.5rem, 6vw, 6rem);
+  line-height: 0.9; letter-spacing: -0.5px;
+  color: var(--ink); text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.section-body {
+  font-size: 1rem; line-height: 1.7;
+  color: var(--ink-muted); max-width: 460px;
+  margin-bottom: 2rem;
+}
+
+/* =============================================
+   SECTION 1 — HERO
+   ============================================= */
+.hero-section {
+  height: 100vh;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6rem 2.5rem 3rem;
+  background: var(--cream);
+}
+.hero-section::before {
+  content: '';
+  position: absolute; top: 50%; left: 55%;
+  transform: translate(-50%, -50%);
+  width: 75vw; height: 75vw; border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,232,210,0.95) 0%, transparent 68%);
+  pointer-events: none; z-index: 0;
+}
+.hero-section::after {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: 58%; height: 52%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 350'%3E%3Cg stroke='%23c4bdb4' stroke-width='0.7' fill='none' opacity='0.35'%3E%3Crect x='40' y='15' width='55' height='180'/%3E%3Crect x='105' y='40' width='35' height='155'/%3E%3Crect x='150' y='8' width='70' height='200'/%3E%3Crect x='230' y='25' width='45' height='175'/%3E%3Crect x='285' y='0' width='80' height='210'/%3E%3Crect x='375' y='30' width='55' height='180'/%3E%3Crect x='440' y='50' width='45' height='160'/%3E%3Cline x1='0' y1='215' x2='500' y2='215'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: cover; background-repeat: no-repeat; background-position: top right;
+  pointer-events: none; z-index: 0; opacity: 0.6;
+}
+
+/* Product Hunt Badge */
+.ph-badge-wrap {
+  position: absolute; top: 6rem; left: 2.5rem;
+  z-index: 20; opacity: 0; transform: translateY(-8px);
+}
+.ph-badge-inner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-bounce), box-shadow 0.2s;
+}
+.ph-badge-inner:hover { transform: translateY(-2px) scale(1.02); }
+.ph-badge-text { display: flex; flex-direction: column; }
+.ph-label { font-size: 0.72rem; font-weight: 700; color: var(--ink); letter-spacing: 0.3px; }
+.ph-sub { font-size: 0.62rem; color: var(--ink-muted); margin-top: 1px; }
+
+/* =============================================
+   EVENT CARD — 3-layer liquid glass
+   ============================================= */
+.event-card {
+  position: relative; z-index: 10;
+  width: 320px; min-width: 320px; border-radius: 28px;
+  overflow: hidden;
+  opacity: 0; transform: translateX(-40px);
+  will-change: transform, opacity;
+  transition: transform 0.5s cubic-bezier(.2,.7,.2,1);
+}
+.event-card:hover {
+  transform: translateX(0) scale(1.025);
+}
+.event-card .ec-bend,
+.event-card .ec-face,
+.event-card .ec-edge {
+  transition: backdrop-filter 0.5s var(--ease-out),
+              background 0.5s var(--ease-out),
+              box-shadow 0.5s var(--ease-out);
+}
+.event-card:hover .ec-bend {
+  backdrop-filter: blur(56px) saturate(240%);
+  -webkit-backdrop-filter: blur(56px) saturate(240%);
+}
+.event-card:hover .ec-edge {
+  background: rgba(255,255,255,0.22);
+  box-shadow:
+    inset 3px 3px 4px rgba(255,255,255,0.6),
+    inset -3px -3px 4px rgba(255,255,255,0.3);
+}
+.event-card:hover .ec-face {
+  box-shadow:
+    0 8px 12px rgba(0,0,0,0.18),
+    0 0 40px rgba(0,0,0,0.1),
+    0 0 60px rgba(255,255,255,0.18);
+}
+.ec-bend {
+  position: absolute; inset: 0; z-index: 0;
+  border-radius: 28px;
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  filter: url(#lg-distort);
+}
+.ec-face {
+  position: absolute; inset: 0; z-index: 1;
+  border-radius: 28px;
+  box-shadow:
+    0 4px 4px rgba(0,0,0,0.15),
+    0 0 24px rgba(0,0,0,0.08),
+    0 0 40px rgba(255,255,255,0.12);
+}
+.ec-edge {
+  position: absolute; inset: 0; z-index: 2;
+  border-radius: 28px;
+  background: rgba(255,255,255,0.32);
+  border: 1.5px solid rgba(255,255,255,0.7);
+  box-shadow:
+    inset 3px 3px 3px rgba(255,255,255,0.5),
+    inset -3px -3px 3px rgba(255,255,255,0.25);
+}
+.ec-content { position: relative; z-index: 3; padding: 8px; }
+
+.ec-image {
+  position: relative; width: 100%;
+  aspect-ratio: 1 / 1.05;
+  border-radius: 18px; overflow: hidden;
+  margin-bottom: 14px;
+}
+.ec-image img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.ec-img-shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+}
+.ec-img-top {
+  position: absolute; top: 12px; left: 12px;
+  display: flex; gap: 6px;
+}
+.ec-time-pill, .ec-home-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 999px;
+  font-size: 0.66rem; font-weight: 500;
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+}
+.ec-time-pill {
+  background: rgba(255,255,255,0.22);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.ec-home-pill {
+  background: rgba(255,255,255,0.92);
+  color: var(--ink);
+  border: 1px solid rgba(255,255,255,0.5);
+}
+.home-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #22c55e; display: inline-block;
+}
+.ec-img-bottom {
+  position: absolute; bottom: 14px; left: 14px; right: 14px;
+  color: #fff;
+}
+.ec-title {
+  font-size: 1.05rem; font-weight: 700; color: #fff;
+  line-height: 1.25;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+}
+.ec-date {
+  font-size: 0.78rem; color: rgba(255,255,255,0.95);
+  margin-top: 2px;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.35);
+}
+
+.ec-organizer {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0 6px 12px;
+}
+.org-av {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.85);
+}
+.org-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.org-name { font-size: 0.78rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.org-role { font-size: 0.66rem; color: var(--ink-faint); }
+.ec-players { display: flex; align-items: center; gap: 4px; }
+.av-stack { display: flex; }
+.mini-av {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.85); margin-left: -7px; flex-shrink: 0;
+}
+.mini-av:first-child { margin-left: 0; }
+.plus-badge { font-size: 0.65rem; font-weight: 600; color: var(--ink-muted); margin-left: 2px; }
+
+.ec-venue {
+  padding: 10px 6px 14px;
+  display: flex; flex-direction: column; gap: 2px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.venue-name { font-size: 0.85rem; font-weight: 700; color: var(--ink); }
+.venue-addr { font-size: 0.7rem; color: var(--ink-muted); line-height: 1.4; }
+
+.ec-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; margin: 6px 0; padding: 0.75rem;
+  border-radius: 14px; border: none;
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s var(--ease-out);
+}
+.ec-btn svg { flex-shrink: 0; }
+.ghost-btn { border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.5); color: var(--ink); }
+.ghost-btn:hover { background: rgba(255,255,255,0.85); }
+.dark-btn { background: var(--ink); color: #fff; }
+.dark-btn:hover { background: #2a2a2a; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.22); }
+.ec-free {
+  text-align: center; font-size: 0.7rem; color: var(--ink-faint);
+  margin: 8px 0 4px; font-weight: 400;
+}
+
+/* HERO PRICING STRIP */
+.hero-pricing {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  margin-top: 1.4rem; padding: 0.5rem 0.6rem 0.5rem 1rem;
+  border-radius: 999px;
+}
+.price-amount {
+  font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 1px;
+  color: var(--ink); line-height: 1;
+}
+.price-sep { color: var(--ink-faint); font-size: 0.85rem; }
+.price-label {
+  font-size: 0.72rem; font-weight: 600; color: var(--ink-muted);
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.price-cta {
+  margin-left: 0.3rem; padding: 0.4rem 1rem;
+  background: var(--ink); color: #fff;
+  border: none; border-radius: 999px;
+  font-family: var(--font-body); font-size: 0.75rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s var(--ease-out);
+  white-space: nowrap;
+}
+.price-cta:hover { background: #2a2a2a; transform: scale(1.03); }
+
+/* HERO TEXT */
+.hero-text {
+  position: relative; z-index: 10;
+  text-align: right; padding-right: 0.5rem;
+  opacity: 0; transform: translateX(40px);
+  margin-left: auto;
+  max-width: 52%;
+}
+.hero-eyebrow {
+  display: block; font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 5px; text-transform: uppercase;
+  color: var(--ink-muted); margin-bottom: 1rem;
+}
+.hero-headline {
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 9.5vw, 9rem);
+  line-height: 0.88; letter-spacing: -1.5px;
+  text-transform: uppercase; margin-bottom: 1.4rem;
+  mix-blend-mode: multiply;
+  display: flex; flex-direction: column;
+}
+.hl-line {
+  display: inline-block;
+  width: max-content;
+  background: linear-gradient(110deg,
+    #0a0a0a 0%,
+    #0a0a0a 40%,
+    #3d3d3d 50%,
+    #0a0a0a 60%,
+    #0a0a0a 100%);
+  background-size: 220% 100%;
+  background-position: 100% 0%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  cursor: pointer;
+  transition:
+    background-position 0.9s cubic-bezier(.2,.7,.2,1),
+    transform 0.5s cubic-bezier(.2,.7,.2,1),
+    letter-spacing 0.5s var(--ease-out);
+  will-change: background-position, transform;
+}
+.hl-line:hover {
+  background-position: 0% 0%;
+  transform: translateX(10px);
+  letter-spacing: 0px;
+}
+.hero-brand {
+  font-family: var(--font-display); font-size: 1.5rem;
+  letter-spacing: 6px; color: var(--ink-muted);
+  opacity: 0.6;
+}
+
+/* SIGNATURE */
+.signature-wrap {
+  position: absolute; bottom: 2.5rem; right: 3rem;
+  z-index: 10; opacity: 0; transform: translateY(10px);
+}
+.sig-svg { width: 140px; height: 50px; }
+.sp1, .sp2, .sp3 { stroke-dasharray: 400; stroke-dashoffset: 400; }
+
+/* SCROLL INDICATOR */
+.scroll-indicator {
+  position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  opacity: 0; animation: fadeInUp 0.6s var(--ease-out) 2.8s forwards; z-index: 10;
+}
+.scroll-line {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--ink-muted));
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; } 50% { opacity: 1; }
+}
+.scroll-indicator span { font-size: 0.55rem; letter-spacing: 3px; color: var(--ink-muted); text-transform: uppercase; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.nav-arrow-btn {
+  position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%);
+  z-index: 20; width: 44px; height: 44px; border-radius: 50%;
+  font-size: 1.4rem; color: var(--ink); cursor: pointer;
+  opacity: 0; transition: all 0.2s var(--ease-out);
+  display: flex; align-items: center; justify-content: center; border: none;
+}
+.nav-arrow-btn:hover { background: var(--ink) !important; color: #fff !important; }
+
+/* AVATAR GRADIENTS */
+.grad-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+.grad-2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.grad-3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.grad-4 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.grad-5 { background: linear-gradient(135deg, #fa709a, #fee140); }
+.grad-6 { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
+.grad-7 { background: linear-gradient(135deg, #ffecd2, #fcb69f); }
+.grad-8 { background: linear-gradient(135deg, #2af598, #009efd); }
+
+/* =============================================
+   SECTION 2 — STATS
+   ============================================= */
+.stats-section {
+  display: flex; align-items: center; justify-content: flex-start;
+  padding: 9rem 4rem 9rem;
+  background: var(--cream);
+  gap: 4rem;
+  min-height: 100vh;
+}
+.stats-bg-text {
+  position: absolute; bottom: -2rem; left: -1rem;
+  font-family: var(--font-display);
+  font-size: clamp(10rem, 22vw, 20rem);
+  line-height: 1; color: rgba(0,0,0,0.025);
+  pointer-events: none; user-select: none; white-space: nowrap;
+}
+.stats-left { flex: 1; max-width: 600px; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.stat-card {
+  border-radius: 20px; padding: 1.4rem 1.6rem;
+  display: flex; flex-direction: column; gap: 4px;
+  opacity: 0; transform: translateY(20px);
+  transition: transform 0.2s var(--ease-bounce), box-shadow 0.2s;
+}
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: inset 4px 4px 4px rgba(255,255,255,0.55), inset -4px -4px 4px rgba(255,255,255,0.55), 0 20px 50px rgba(0,0,0,0.1);
+}
+.stat-num { font-family: var(--font-display); font-size: 2.8rem; line-height: 1; color: var(--ink); letter-spacing: -1px; }
+.stat-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-muted); }
+.stat-delta { font-size: 0.68rem; font-weight: 500; margin-top: 4px; padding: 3px 8px; border-radius: 999px; display: inline-block; width: fit-content; }
+.stat-delta.up { background: rgba(34,197,94,0.12); color: #16a34a; }
+.stat-delta.neutral { background: rgba(0,0,0,0.05); color: var(--ink-muted); }
+
+/* =============================================
+   SECTION 3 — HOW IT WORKS
+   ============================================= */
+.how-section {
+  display: flex; align-items: center;
+  padding: 9rem 4rem;
+  gap: 6rem;
+  background: var(--cream-mid);
+  min-height: 100vh;
+}
+.how-bg-text {
+  position: absolute; top: 50%; right: -1rem;
+  transform: translateY(-50%);
+  font-family: var(--font-display);
+  font-size: clamp(10rem, 22vw, 20rem);
+  line-height: 1; color: rgba(0,0,0,0.025);
+  pointer-events: none; user-select: none; white-space: nowrap;
+}
+.how-ball-zone { display: none; }
+.how-content {
+  flex: 1; max-width: 600px;
+  text-align: right;
+  margin-left: auto;
+}
+.how-content .section-eyebrow { text-align: right; }
+.how-content .section-headline { text-align: right; }
+.how-content .cta-row { justify-content: flex-end; }
+.steps-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2.5rem; }
+.step-item {
+  display: flex; align-items: center; gap: 1.2rem;
+  padding: 1.4rem 1.6rem; border-radius: 18px; cursor: pointer;
+  opacity: 0; transform: translateX(30px);
+  transition: all 0.2s var(--ease-bounce);
+}
+.step-item:hover { transform: translateX(4px); box-shadow: inset 4px 4px 4px rgba(255,255,255,0.55), inset -4px -4px 4px rgba(255,255,255,0.55), 0 16px 40px rgba(0,0,0,0.09); }
+.step-number { font-family: var(--font-display); font-size: 2.5rem; line-height: 1; color: rgba(0,0,0,0.1); min-width: 52px; }
+.step-info { flex: 1; }
+.step-title { font-size: 1rem; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.step-desc { font-size: 0.8rem; line-height: 1.6; color: var(--ink-muted); }
+.step-arrow { font-size: 1.2rem; color: var(--ink-muted); }
+.cta-row { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
+.cta-main-btn {
+  padding: 1rem 2.4rem; border-radius: 14px; border: none;
+  background: var(--ink); color: #fff;
+  font-family: var(--font-body); font-size: 0.9rem; font-weight: 700;
+  cursor: pointer; letter-spacing: 0.3px;
+  transition: all 0.2s var(--ease-bounce);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+}
+.cta-main-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 30px rgba(0,0,0,0.22); }
+.ph-embed {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.7rem 1.2rem; border-radius: 14px; cursor: pointer;
+  transition: transform 0.2s var(--ease-bounce);
+}
+.ph-embed:hover { transform: translateY(-2px); }
+.ph-embed-text { display: flex; flex-direction: column; }
+.ph-embed-label { font-size: 0.6rem; color: var(--ink-muted); letter-spacing: 0.5px; }
+.ph-embed-name { font-size: 0.78rem; font-weight: 700; color: var(--ink); }
+.ph-embed-score {
+  font-family: var(--font-display); font-size: 1.6rem; color: var(--ink);
+  padding-left: 4px; border-left: 1px solid rgba(0,0,0,0.1); margin-left: 4px;
+}
+
+/* =============================================
+   FOOTER
+   ============================================= */
+.site-footer {
+  position: relative; overflow: hidden;
+  background: var(--ink);
+  padding: 10rem 4rem 1rem;
+  color: rgba(255,255,255,0.75);
+  min-height: 100vh;
+}
+.footer-bg-ball {
+  position: absolute; bottom: -8rem; right: -8rem;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 70%);
+  pointer-events: none;
+}
+.footer-inner { max-width: 1400px; margin: 0 auto; }
+.footer-top {
+  display: grid; grid-template-columns: 1.4fr 1.5fr 1fr;
+  gap: 4rem; padding-bottom: 5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.footer-brand { display: flex; flex-direction: column; gap: 1rem; }
+.footer-logo { font-family: var(--font-display); font-size: 3rem; letter-spacing: 4px; color: #fff; line-height: 1; }
+.footer-tagline { font-size: 0.88rem; line-height: 1.7; color: rgba(255,255,255,0.45); max-width: 260px; }
+.footer-socials { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.5rem; }
+.social-pill {
+  padding: 0.4rem 0.9rem; border-radius: 999px;
+  font-size: 0.72rem; font-weight: 500; color: var(--ink);
+  text-decoration: none; transition: all 0.2s var(--ease-out);
+}
+.social-pill:hover { background: rgba(255,255,255,0.95) !important; transform: translateY(-2px); }
+.footer-links-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+.footer-col { display: flex; flex-direction: column; gap: 0.7rem; }
+.footer-col-title {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 0.3rem;
+}
+.footer-link {
+  font-size: 0.88rem; color: rgba(255,255,255,0.6);
+  text-decoration: none; transition: color 0.2s, transform 0.2s; display: inline-block;
+}
+.footer-link:hover { color: #fff; transform: translateX(4px); }
+.footer-newsletter {
+  border-radius: 20px; padding: 1.8rem;
+  display: flex; flex-direction: column; gap: 0.8rem;
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  box-shadow: inset 2px 2px 2px rgba(255,255,255,0.04), inset -2px -2px 2px rgba(255,255,255,0.04) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+.newsletter-title { font-size: 1rem; font-weight: 700; color: #fff; }
+.newsletter-desc { font-size: 0.78rem; line-height: 1.6; color: rgba(255,255,255,0.45); }
+.newsletter-input-row { display: flex; gap: 8px; margin-top: 0.4rem; }
+.newsletter-input {
+  flex: 1; padding: 0.7rem 1rem; border-radius: 10px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff; font-family: var(--font-body); font-size: 0.82rem; outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.newsletter-input::placeholder { color: rgba(255,255,255,0.25); }
+.newsletter-input:focus { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+.newsletter-btn {
+  padding: 0.7rem 1.2rem; border-radius: 10px;
+  background: #fff !important; color: var(--ink) !important;
+  font-weight: 700; font-size: 1rem; cursor: pointer; border: none;
+  transition: all 0.2s var(--ease-bounce);
+}
+.newsletter-btn:hover { transform: scale(1.06); }
+.footer-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 2rem 0; flex-wrap: wrap; gap: 1.5rem;
+}
+.footer-bottom-left { display: flex; flex-direction: column; gap: 6px; }
+.footer-copy { font-size: 0.75rem; color: rgba(255,255,255,0.25); }
+.footer-legal { display: flex; gap: 8px; align-items: center; }
+.legal-link { font-size: 0.72rem; color: rgba(255,255,255,0.3); text-decoration: none; transition: color 0.2s; }
+.legal-link:hover { color: rgba(255,255,255,0.7); }
+.sep { color: rgba(255,255,255,0.15); font-size: 0.72rem; }
+.footer-ph-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0.5rem 1rem; border-radius: 999px;
+  font-size: 0.72rem; font-weight: 600; color: var(--ink);
+  background: rgba(255,255,255,0.88) !important;
+  border: 1px solid rgba(255,255,255,0.9) !important;
+  backdrop-filter: none !important;
+}
+.footer-cities { overflow: hidden; max-width: 400px; }
+.cities-label { display: block; font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.2); margin-bottom: 4px; }
+.cities-scroll {
+  display: flex; white-space: nowrap;
+  font-family: var(--font-display); font-size: 0.75rem; letter-spacing: 2px;
+  color: rgba(255,255,255,0.2);
+  animation: cityScroll 20s linear infinite;
+}
+@keyframes cityScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* =============================================
+   RESPONSIVE — TABLET
+   ============================================= */
+@media (max-width: 900px) {
+  .hero-section { flex-direction: column; justify-content: flex-end; padding: 6rem 1.5rem 5rem; }
+  .event-card { display: none; }
+  .hero-text { text-align: center; transform: none; max-width: 100%; margin: 0; }
+  .hero-headline { mix-blend-mode: normal; }
+  .hero-pricing { justify-content: center; }
+  .stats-section, .how-section { flex-direction: column; padding: 6rem 1.5rem; }
+  .how-ball-zone { display: none; }
+  .footer-top { grid-template-columns: 1fr; gap: 2.5rem; }
+  .footer-links-grid { grid-template-columns: repeat(2, 1fr); }
+  .navbar { padding: 1rem 1.2rem; }
+  .nav-links { display: none; }
+  .nav-right { display: none; }
+}
+
+/* =============================================
+   RESPONSIVE — MOBILE
+   ============================================= */
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0.8rem 1.2rem;
+    background: rgba(255,255,255,0.4);
+  }
+  .nav-logo { font-size: 1.2rem; }
+
+  .hero-section {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 5.5rem 1.4rem 2rem;
+    gap: 0;
+    min-height: 100svh;
+  }
+  .ph-badge-wrap { top: 4.5rem; left: 1.2rem; }
+  .event-card { display: none; }
+
+  .hero-text {
+    text-align: left;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    z-index: 20;
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 0.6rem;
+    letter-spacing: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .hero-headline {
+    font-size: clamp(3.8rem, 17vw, 5.5rem);
+    line-height: 0.88;
+    mix-blend-mode: normal;
+  }
+  .hero-brand {
+    font-size: 1.3rem;
+    letter-spacing: 5px;
+    margin-top: 0.6rem;
+  }
+  .hero-pricing {
+    margin-top: 1rem;
+    pointer-events: all;
+  }
+
+  #hero-canvas { z-index: 15; }
+
+  .signature-wrap { bottom: 8.5rem; right: 1.2rem; }
+  .sig-svg { width: 100px; }
+
+  .scroll-indicator { bottom: 1rem; }
+  .drag-hint { bottom: 4rem; font-size: 0.5rem; }
+  .nav-arrow-btn { display: none; }
+
+  .stats-section {
+    flex-direction: column;
+    padding: 5rem 1.4rem 4rem;
+  }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .stat-num { font-size: 2.2rem; }
+
+  .how-section {
+    flex-direction: column;
+    padding: 5rem 1.4rem 4rem;
+    gap: 2rem;
+  }
+  .how-ball-zone { display: none; }
+  .step-item { padding: 1rem 1.2rem; }
+  .section-headline { font-size: clamp(2.8rem, 10vw, 4rem); }
+
+  .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+  .footer-links-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .footer-inner { padding: 3rem 1.4rem 1.5rem; }
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .footer-cities { display: none; }
+  .footer-logo { font-size: 2.5rem; }
+  .footer-newsletter { min-width: unset; }
+  .newsletter-input-row { flex-direction: column; gap: 0.5rem; }
+  .newsletter-input, .newsletter-btn {
+    width: 100%; border-radius: 12px;
+    padding: 0.8rem 1rem; text-align: center;
+  }
+}
+```
+
+#### E. [src/main.js]
+```javascript
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+gsap.registerPlugin(ScrollTrigger);
+
+// ─── RENDERER ───────────────────────────────────────────────────────────────
+const canvas = document.getElementById('hero-canvas');
+const renderer = new THREE.WebGLRenderer({
+  canvas, alpha: true, antialias: true, powerPreference: 'high-performance'
+});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.64;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+// ─── SCENE & CAMERA ─────────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(0, 0, 5.5);
+
+// ─── PMREM REFLECTION ENVIRONMENT ───────────────────────────────────────────
+const pmrem = new THREE.PMREMGenerator(renderer);
+pmrem.compileEquirectangularShader();
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+
+// ─── LIGHTING ───────────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xfff0dd, 0.55));
+const keyLight = new THREE.DirectionalLight(0xffeedd, 1.6);
+keyLight.position.set(-2, 4, 5);
+scene.add(keyLight);
+const fillLight = new THREE.DirectionalLight(0xf5e8d0, 0.35);
+fillLight.position.set(4, 1, -2);
+scene.add(fillLight);
+scene.add(new THREE.HemisphereLight(0xfff0dd, 0xcfc0ae, 0.4));
+
+// ─── BALL STATE ─────────────────────────────────────────────────────────────
+let ball = null;
+let ballLoaded = false;
+let baseScale = 1;
+let currentSection = 'hero';
+
+// ─── SCROLL COORDINATES FOR THE BALL ────────────────────────────────────────
+const BALL_SCALE = 0.97;
+const FOOTER_SCALE = 0.5;
+const SECTIONS = {
+  hero:   { x: 0.5,   y: -0.45, z: 0,    scale: BALL_SCALE   },
+  stats:  { x: 2.2,   y:  0.0,  z: 0,    scale: BALL_SCALE   },
+  how:    { x: -2.2,  y:  0.0,  z: 0,    scale: BALL_SCALE   },
+  footer: { x: 2.5,   y: -1.3,  z: -2.0, scale: FOOTER_SCALE },
+};
+
+// ─── LOAD BALL ──────────────────────────────────────────────────────────────
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);
+
+// Make sure your basketball.glb file exists at public/models/basketball.glb
+loader.load('/models/basketball.glb', (gltf) => {
+  ball = gltf.scene;
+
+  // Center model geometry
+  const box = new THREE.Box3().setFromObject(ball);
+  const center = box.getCenter(new THREE.Vector3());
+  ball.position.sub(center);
+
+  // Compute model size and normal scale factor
+  const size = box.getSize(new THREE.Vector3());
+  baseScale = 2.4 / Math.max(size.x, size.y, size.z);
+  ball.scale.setScalar(baseScale * SECTIONS.hero.scale);
+  ball.position.set(SECTIONS.hero.x, SECTIONS.hero.y, SECTIONS.hero.z);
+
+  // Material optimizations for premium leather shininess
+  ball.traverse((child) => {
+    if (child.isMesh && child.material) {
+      const m = child.material;
+      m.envMapIntensity = 0.15;
+      if (m.roughness !== undefined) m.roughness = Math.min(1.0, Math.max(0.82, (m.roughness ?? 0.5) * 1.55));
+      if (m.metalness !== undefined) m.metalness = 0;
+      if (m.color) m.color.multiplyScalar(0.68); // rich dark tone
+      m.needsUpdate = true;
+    }
+  });
+
+  scene.add(ball);
+  ballLoaded = true;
+  ballEntrance();
+}, undefined, (err) => console.error('GLB Loader Error:', err));
+
+// ─── ENTRANCE ANIMATION ──────────────────────────────────────────────────────
+function ballEntrance() {
+  if (!ball) return;
+  const targetS = baseScale * SECTIONS.hero.scale;
+  ball.scale.setScalar(targetS * 0.25);
+
+  gsap.to(ball.scale, {
+    x: targetS, y: targetS, z: targetS,
+    duration: 1.3, ease: 'expo.out', delay: 0.5,
+    onComplete: () => enableDrag()
+  });
+  gsap.fromTo(ball.position,
+    { y: SECTIONS.hero.y - 0.8 },
+    { y: SECTIONS.hero.y, duration: 1.3, ease: 'expo.out', delay: 0.5 }
+  );
+}
+
+// ─── DRAG PHYSICS FOR HERO SPIN ──────────────────────────────────────────────
+let isDragging = false;
+let prevMouse = { x: 0, y: 0 };
+let velocity = { x: 0, y: 0 };
+const DAMPING = 0.94;
+let momentumRAF = null;
+
+const BASE_SPEED = 0.003;
+let autoVel = {
+  x: (Math.random() - 0.5) * 0.003,
+  y: BASE_SPEED + Math.random() * 0.002,
+};
+
+function enableDrag()  { canvas.classList.add('drag-enabled'); }
+function disableDrag() { canvas.classList.remove('drag-enabled'); }
+
+function getPos(e) {
+  if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  return { x: e.clientX, y: e.clientY };
+}
+
+function onDragStart(e) {
+  if (!ballLoaded || currentSection !== 'hero') return;
+  isDragging = true;
+  prevMouse = getPos(e);
+  velocity = { x: 0, y: 0 };
+  if (momentumRAF) cancelAnimationFrame(momentumRAF);
+}
+function onDragMove(e) {
+  if (!isDragging || !ball) return;
+  if (e.cancelable) e.preventDefault();
+  const pos = getPos(e);
+  velocity.x = (pos.y - prevMouse.y) * 0.006;
+  velocity.y = (pos.x - prevMouse.x) * 0.006;
+  ball.rotation.x += velocity.x;
+  ball.rotation.y += velocity.y;
+  prevMouse = { ...pos };
+}
+function onDragEnd() {
+  if (!isDragging) return;
+  isDragging = false;
+  applyMomentum();
+}
+function applyMomentum() {
+  if (!ball) return;
+  velocity.x *= DAMPING;
+  velocity.y *= DAMPING;
+  ball.rotation.x += velocity.x;
+  ball.rotation.y += velocity.y;
+  if (Math.abs(velocity.x) + Math.abs(velocity.y) > 0.0003) {
+    momentumRAF = requestAnimationFrame(applyMomentum);
+  } else {
+    const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+    if (speed > 0.00005) {
+      autoVel = { x: velocity.x / speed * BASE_SPEED, y: velocity.y / speed * BASE_SPEED };
+    }
+    velocity = { x: 0, y: 0 };
+  }
+}
+
+canvas.addEventListener('mousedown', onDragStart);
+window.addEventListener('mousemove', onDragMove);
+window.addEventListener('mouseup', onDragEnd);
+canvas.addEventListener('touchstart', onDragStart, { passive: false });
+window.addEventListener('touchmove', onDragMove, { passive: false });
+window.addEventListener('touchend', onDragEnd);
+
+// ─── SCROLL TRIGGER TRANSITIONS ──────────────────────────────────────────────
+function lerp(a, b, t) { return a + (b - a) * t; }
+function easeInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+function depthOffset(y) { return Math.min(0, y) * 0.3; }
+
+function setupScrollBall() {
+  // Hero to Stats
+  ScrollTrigger.create({
+    trigger: '#stats-section',
+    start: 'top bottom', end: 'top top', scrub: 2,
+    onUpdate: (self) => {
+      if (!ball || isDragging) return;
+      const t = self.progress;
+      const ly = lerp(SECTIONS.hero.y, SECTIONS.stats.y, easeInOut(t));
+      ball.position.x = lerp(SECTIONS.hero.x, SECTIONS.stats.x, t);
+      ball.position.y = ly;
+      ball.position.z = lerp(SECTIONS.hero.z, SECTIONS.stats.z, t) + depthOffset(ly);
+      ball.scale.setScalar(lerp(baseScale * SECTIONS.hero.scale, baseScale * SECTIONS.stats.scale, t));
+    },
+    onEnter: () => { disableDrag(); currentSection = 'stats'; },
+    onLeaveBack: () => { currentSection = 'hero'; enableDrag(); }
+  });
+
+  // Stats to How-It-Works
+  ScrollTrigger.create({
+    trigger: '#how-section',
+    start: 'top bottom', end: 'top top', scrub: 2,
+    onUpdate: (self) => {
+      if (!ball || isDragging) return;
+      const t = self.progress;
+      const ly = lerp(SECTIONS.stats.y, SECTIONS.how.y, easeInOut(t));
+      ball.position.x = lerp(SECTIONS.stats.x, SECTIONS.how.x, t);
+      ball.position.y = ly;
+      ball.position.z = lerp(SECTIONS.stats.z, SECTIONS.how.z, t) + depthOffset(ly);
+      ball.scale.setScalar(lerp(baseScale * SECTIONS.stats.scale, baseScale * SECTIONS.how.scale, t));
+    },
+    onEnter:     () => { currentSection = 'how'; },
+    onLeaveBack: () => { currentSection = 'stats'; }
+  });
+
+  // How-It-Works to Footer
+  ScrollTrigger.create({
+    trigger: '#site-footer',
+    start: 'top bottom', end: 'top top', scrub: 2,
+    onUpdate: (self) => {
+      if (!ball || isDragging) return;
+      const t = self.progress;
+      const ly = lerp(SECTIONS.how.y, SECTIONS.footer.y, easeInOut(t));
+      ball.position.x = lerp(SECTIONS.how.x, SECTIONS.footer.x, t);
+      ball.position.y = ly;
+      ball.position.z = lerp(SECTIONS.how.z, SECTIONS.footer.z, t) + depthOffset(ly);
+      ball.scale.setScalar(lerp(baseScale * SECTIONS.how.scale, baseScale * SECTIONS.footer.scale, t));
+    },
+    onEnter:     () => { currentSection = 'footer'; },
+    onLeaveBack: () => { currentSection = 'how'; }
+  });
+}
+
+// ─── UI COMPONENT ENTRANCE ANIMATIONS ───────────────────────────────────────
+const navTL = gsap.timeline({ delay: 0.15 });
+navTL
+  .to('.nav-logo',    { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.1)
+  .to('.nav-links',   { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.15)
+  .to('.profile-btn', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.2)
+  .to('#ph-badge',    { opacity: 1, y: 0, duration: 0.7, ease: 'expo.out'   }, 0.4)
+  .to('#event-card',  { opacity: 1, x: 0, duration: 1.1, ease: 'expo.out'   }, 0.55)
+  .to('#hero-text',   { opacity: 1, x: 0, duration: 1.1, ease: 'expo.out'   }, 0.65)
+  .to('#nav-arrow',   { opacity: 1,        duration: 0.5, ease: 'power2.out' }, 1.1)
+  .to('#sig-wrap',    { opacity: 1, y: 0,  duration: 0.4, ease: 'power2.out' }, 1.2)
+  .to('.sp1',         { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut' }, 1.2)
+  .to('.sp2',         { strokeDashoffset: 0, duration: 1.0, ease: 'power2.inOut' }, 1.8)
+  .to('.sp3',         { strokeDashoffset: 0, duration: 0.7, ease: 'power2.inOut' }, 2.0);
+
+// Staggered scrolls for Stat cards
+ScrollTrigger.create({
+  trigger: '#stats-section', start: 'top 75%',
+  onEnter: () => {
+    gsap.to('.stat-card', { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out', stagger: 0.1, delay: 0.1 });
+  }
+});
+
+// Staggered scrolls for Steps list
+ScrollTrigger.create({
+  trigger: '#how-section', start: 'top 70%',
+  onEnter: () => {
+    gsap.to('.step-item', { opacity: 1, x: 0, duration: 0.9, ease: 'expo.out', stagger: 0.15, delay: 0.1 });
+  }
+});
+
+// Navbar glass blur transition on scroll
+const navEl = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navEl.classList.toggle('scrolled', window.scrollY > 80);
+}, { passive: true });
+
+// Event Card premium lift on hover
+const eventCardEl = document.getElementById('event-card');
+if (eventCardEl) {
+  eventCardEl.addEventListener('mouseenter', () => {
+    gsap.to(eventCardEl, {
+      scale: 1.035, y: -6,
+      duration: 0.55, ease: 'power3.out', overwrite: 'auto'
+    });
+  });
+  eventCardEl.addEventListener('mouseleave', () => {
+    gsap.to(eventCardEl, {
+      scale: 1.0, y: 0,
+      duration: 0.55, ease: 'power3.out', overwrite: 'auto'
+    });
+  });
+}
+
+// ─── RESIZE ─────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
+
+// ─── RENDER LOOP ────────────────────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  if (ball && !isDragging) {
+    ball.rotation.x += autoVel.x;
+    ball.rotation.y += autoVel.y;
+  }
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('load', () => {
+  setupScrollBall();
+  ScrollTrigger.refresh();
+});
+```
+
+---
+
+### 3. Implementation Instructions
+1. Run `npm install` inside the project folder to retrieve `three`, `gsap`, and `vite`.
+2. Locate a high-quality `.glb` basketball model and place it in the `public/models/` folder as `basketball.glb`.
+3. Launch the local dev environment with `npm run dev`.
+```
+***
