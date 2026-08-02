@@ -829,11 +829,10 @@ body {
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 8.5rem 1.4rem 2rem; /* Increased top padding to sit comfortably below top nav and Product Hunt badge */
+    padding: 7.5rem 1.4rem 2rem; /* Sit comfortably below floating navbar */
     gap: 0;
     min-height: 100svh;
   }
-  .ph-badge-wrap { top: 4.8rem; left: 1.4rem; }
   .event-card { display: none; }
 
   .hero-text {

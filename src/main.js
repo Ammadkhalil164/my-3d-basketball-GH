@@ -244,7 +244,6 @@ navTL
   .to('.nav-logo',    { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.1)
   .to('.nav-links',   { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.15)
   .to('.profile-btn', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.2)
-  .to('#ph-badge',    { opacity: 1, y: 0, duration: 0.7, ease: 'expo.out'   }, 0.4)
   .to('#event-card',  { opacity: 1, x: 0, duration: 1.1, ease: 'expo.out'   }, 0.55)
   .to('#hero-text',   { opacity: 1, x: 0, duration: 1.1, ease: 'expo.out'   }, 0.65)
   .to('#nav-arrow',   { opacity: 1,        duration: 0.5, ease: 'power2.out' }, 1.1)
