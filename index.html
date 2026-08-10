@@ -2,15 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" href="/basketball-icon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Y68° — Find Your Street Ballers</title>
+  <title>Y-Star — Find Your Street Ballers</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
+
+  <!-- Loading Screen Progress Bar -->
+  <div id="loader-screen">
+    <div class="loader-container">
+      <div class="loader-brand">Y-Star</div>
+      <div class="loader-outer">
+        <div class="loader-inner-container">
+          <div class="loader-fill" id="loader-fill"></div>
+          <div class="loader-marker-container" id="loader-marker-container">
+            <img src="/basketball-icon.png" class="loader-marker" alt="ball" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="noise-overlay"></div>
 
@@ -26,7 +41,7 @@
 
   <!-- NAVBAR — floating pill -->
   <nav class="navbar" id="navbar">
-    <span class="nav-logo">Y68°</span>
+    <span class="nav-logo">Y-Star</span>
     <div class="nav-links">
       <a href="#hero-section" class="nav-link">Play</a>
       <a href="#stats-section" class="nav-link">Leaderboard</a>
@@ -119,7 +134,7 @@
           <span class="hl-line-mobile-2">BALLERS</span>
         </span>
       </h1>
-      <p class="hero-brand">Y68°</p>
+      <p class="hero-brand">Y-Star</p>
       <div class="hero-pricing glass-pill">
         <span class="price-amount">$100</span>
         <span class="price-sep">/</span>
@@ -157,7 +172,7 @@
     <div class="stats-left">
       <span class="section-eyebrow">By The Numbers</span>
       <h2 class="section-headline">THE STREETS<br>ARE ALIVE.</h2>
-      <p class="section-body">From Tokyo to London, Lagos to NYC — ballers are running Y68° games every single day.</p>
+      <p class="section-body">From Tokyo to London, Lagos to NYC — ballers are running Y-Star games every single day.</p>
 
       <div class="stats-grid">
         <div class="stat-card glass-card">
@@ -245,7 +260,7 @@
     <div class="footer-inner">
       <div class="footer-top">
         <div class="footer-brand">
-          <div class="footer-logo">Y68°</div>
+          <div class="footer-logo">Y-Star</div>
           <p class="footer-tagline">The world's most premium<br>street volleyball network.</p>
           <div class="footer-socials">
             <a href="#" class="social-pill glass-pill">𝕏 Twitter</a>
@@ -290,7 +305,7 @@
 
       <div class="footer-bottom">
         <div class="footer-bottom-left">
-          <span class="footer-copy">© 2026 Y68° Street Volleyball. All rights reserved.</span>
+          <span class="footer-copy">© 2026 Y-Star Street Volleyball. All rights reserved.</span>
           <div class="footer-legal">
             <a href="#" class="legal-link">Privacy</a>
             <span class="sep">·</span>

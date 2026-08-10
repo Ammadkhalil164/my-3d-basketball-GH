@@ -62,6 +62,77 @@ dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5
 const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
 
+let loaderTarget = 0;
+let visualProgress = 0;
+let loaderFinished = false;
+
+const fill = document.getElementById('loader-fill');
+const marker = document.getElementById('loader-marker-container');
+const screen = document.getElementById('loader-screen');
+
+function renderLoader(percent) {
+  if (fill) {
+    fill.style.width = `${percent}%`;
+  }
+  if (marker) {
+    marker.style.left = `${percent}%`;
+  }
+}
+
+// Start visual progress simulation immediately on script run
+// It goes to 88% over 4.2 seconds to guarantee a smooth, gradual visual fill
+let targetTween = gsap.to({ val: 0 }, {
+  val: 88,
+  duration: 4.2,
+  ease: 'sine.out',
+  onUpdate: function() {
+    loaderTarget = Math.max(loaderTarget, this.targets()[0].val);
+  }
+});
+
+function tickLoader() {
+  if (visualProgress < loaderTarget) {
+    visualProgress += (loaderTarget - visualProgress) * 0.08;
+    if (Math.abs(loaderTarget - visualProgress) < 0.1) {
+      visualProgress = loaderTarget;
+    }
+    renderLoader(visualProgress);
+  }
+
+  if (visualProgress >= 100 && !loaderFinished) {
+    loaderFinished = true;
+    setTimeout(() => {
+      if (screen) {
+        gsap.to(screen, {
+          opacity: 0,
+          duration: 0.5,
+          ease: 'power2.out',
+          onComplete: () => {
+            screen.style.display = 'none';
+            navTL.play();
+            ballEntrance();
+          }
+        });
+      }
+    }, 400);
+  }
+
+  if (!loaderFinished) {
+    requestAnimationFrame(tickLoader);
+  }
+}
+requestAnimationFrame(tickLoader);
+
+function updateLoader(percent) {
+  if (percent >= 100) {
+    if (targetTween) {
+      targetTween.kill();
+      targetTween = null;
+    }
+  }
+  loaderTarget = Math.max(loaderTarget, percent);
+}
+
 loader.load('/models/basketball.glb', (gltf) => {
   ball = gltf.scene;
 
@@ -88,8 +159,16 @@ loader.load('/models/basketball.glb', (gltf) => {
 
   scene.add(ball);
   ballLoaded = true;
-  ballEntrance();
-}, undefined, (err) => console.error('GLB Error:', err));
+  updateLoader(100);
+}, (xhr) => {
+  if (xhr.total) {
+    const percent = Math.min((xhr.loaded / xhr.total) * 100, 99);
+    updateLoader(percent);
+  }
+}, (err) => {
+  console.error('GLB Error:', err);
+  updateLoader(100);
+});
 
 // ─── ENTRANCE (one-time only — no continuous motion) ────────────────────────
 function ballEntrance() {
@@ -239,7 +318,7 @@ function setupScrollBall() {
 }
 
 // ─── UI ENTRANCE ANIMATIONS ──────────────────────────────────────────────────
-const navTL = gsap.timeline({ delay: 0.15 });
+const navTL = gsap.timeline({ paused: true, delay: 0.15 });
 navTL
   .to('.nav-logo',    { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.1)
   .to('.nav-links',   { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.15)
