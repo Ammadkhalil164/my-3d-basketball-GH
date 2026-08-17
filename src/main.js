@@ -50,15 +50,15 @@ let currentSection = 'hero';
 const BALL_SCALE = 0.97;          // +10% from 0.885
 const FOOTER_SCALE = 0.5;          // shrunk specifically for footer (per user)
 const SECTIONS = {
-  hero:   { x: 0.5,   y: -0.45, z: 0,    scale: BALL_SCALE   }, // pulled right so text overlaps ball
-  stats:  { x: 2.2,   y:  0.0,  z: 0,    scale: BALL_SCALE   },
-  how:    { x: -2.2,  y:  0.0,  z: 0,    scale: BALL_SCALE   },
-  footer: { x: 2.5,   y: -1.3,  z: -2.0, scale: FOOTER_SCALE }, // small, far corner, pushed back
+  hero: { x: 0.5, y: -0.45, z: 0, scale: BALL_SCALE }, // pulled right so text overlaps ball
+  stats: { x: 2.2, y: 0.0, z: 0, scale: BALL_SCALE },
+  how: { x: -2.2, y: 0.0, z: 0, scale: BALL_SCALE },
+  footer: { x: 2.5, y: -1.3, z: -2.0, scale: FOOTER_SCALE }, // small, far corner, pushed back
 };
 
 // ─── LOAD BALL ──────────────────────────────────────────────────────────────
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+dracoLoader.setDecoderPath('/draco/');
 const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
 
@@ -85,7 +85,7 @@ let targetTween = gsap.to({ val: 0 }, {
   val: 88,
   duration: 4.2,
   ease: 'sine.out',
-  onUpdate: function() {
+  onUpdate: function () {
     loaderTarget = Math.max(loaderTarget, this.targets()[0].val);
   }
 });
@@ -201,7 +201,7 @@ let autoVel = {
   y: BASE_SPEED + Math.random() * 0.002,
 };
 
-function enableDrag()  { canvas.classList.add('drag-enabled'); }
+function enableDrag() { canvas.classList.add('drag-enabled'); }
 function disableDrag() { canvas.classList.remove('drag-enabled'); }
 
 function getPos(e) {
@@ -295,7 +295,7 @@ function setupScrollBall() {
       ball.position.z = lerp(SECTIONS.stats.z, SECTIONS.how.z, t) + depthOffset(ly);
       ball.scale.setScalar(lerp(baseScale * SECTIONS.stats.scale, baseScale * SECTIONS.how.scale, t));
     },
-    onEnter:     () => { currentSection = 'how'; },
+    onEnter: () => { currentSection = 'how'; },
     onLeaveBack: () => { currentSection = 'stats'; }
   });
 
@@ -312,7 +312,7 @@ function setupScrollBall() {
       ball.position.z = lerp(SECTIONS.how.z, SECTIONS.footer.z, t) + depthOffset(ly);
       ball.scale.setScalar(lerp(baseScale * SECTIONS.how.scale, baseScale * SECTIONS.footer.scale, t));
     },
-    onEnter:     () => { currentSection = 'footer'; },
+    onEnter: () => { currentSection = 'footer'; },
     onLeaveBack: () => { currentSection = 'how'; }
   });
 }
@@ -320,16 +320,16 @@ function setupScrollBall() {
 // ─── UI ENTRANCE ANIMATIONS ──────────────────────────────────────────────────
 const navTL = gsap.timeline({ paused: true, delay: 0.15 });
 navTL
-  .to('.nav-logo',    { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.1)
-  .to('.nav-links',   { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.15)
+  .to('.nav-logo', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.1)
+  .to('.nav-links', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.15)
   .to('.profile-btn', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.2)
-  .to('#event-card',  { opacity: 1, x: 0, duration: 1.1, ease: 'expo.out'   }, 0.55)
-  .to('#hero-text',   { opacity: 1, x: 0, duration: 1.1, ease: 'expo.out'   }, 0.65)
-  .to('#nav-arrow',   { opacity: 1,        duration: 0.5, ease: 'power2.out' }, 1.1)
-  .to('#sig-wrap',    { opacity: 1, y: 0,  duration: 0.4, ease: 'power2.out' }, 1.2)
-  .to('.sp1',         { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut' }, 1.2)
-  .to('.sp2',         { strokeDashoffset: 0, duration: 1.0, ease: 'power2.inOut' }, 1.8)
-  .to('.sp3',         { strokeDashoffset: 0, duration: 0.7, ease: 'power2.inOut' }, 2.0);
+  .to('#event-card', { opacity: 1, x: 0, duration: 1.1, ease: 'expo.out' }, 0.55)
+  .to('#hero-text', { opacity: 1, x: 0, duration: 1.1, ease: 'expo.out' }, 0.65)
+  .to('#nav-arrow', { opacity: 1, duration: 0.5, ease: 'power2.out' }, 1.1)
+  .to('#sig-wrap', { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, 1.2)
+  .to('.sp1', { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut' }, 1.2)
+  .to('.sp2', { strokeDashoffset: 0, duration: 1.0, ease: 'power2.inOut' }, 1.8)
+  .to('.sp3', { strokeDashoffset: 0, duration: 0.7, ease: 'power2.inOut' }, 2.0);
 
 // Stats — animate in on scroll
 ScrollTrigger.create({
