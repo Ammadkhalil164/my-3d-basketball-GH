@@ -79,42 +79,30 @@ function renderLoader(percent) {
   }
 }
 
-// Start visual progress simulation immediately on script run
-// It goes to 88% over 4.2 seconds to guarantee a smooth, gradual visual fill
-let targetTween = gsap.to({ val: 0 }, {
-  val: 88,
-  duration: 4.2,
-  ease: 'sine.out',
-  onUpdate: function () {
-    loaderTarget = Math.max(loaderTarget, this.targets()[0].val);
-  }
-});
-
+// Start visual progress simulation based on actual load progress (no artificial delays)
 function tickLoader() {
   if (visualProgress < loaderTarget) {
-    visualProgress += (loaderTarget - visualProgress) * 0.08;
+    visualProgress += (loaderTarget - visualProgress) * 0.15;
     if (Math.abs(loaderTarget - visualProgress) < 0.1) {
       visualProgress = loaderTarget;
     }
     renderLoader(visualProgress);
   }
 
-  if (visualProgress >= 100 && !loaderFinished) {
+  if (visualProgress >= 99.9 && !loaderFinished) {
     loaderFinished = true;
-    setTimeout(() => {
-      if (screen) {
-        gsap.to(screen, {
-          opacity: 0,
-          duration: 0.5,
-          ease: 'power2.out',
-          onComplete: () => {
-            screen.style.display = 'none';
-            navTL.play();
-            ballEntrance();
-          }
-        });
-      }
-    }, 400);
+    if (screen) {
+      gsap.to(screen, {
+        opacity: 0,
+        duration: 0.4,
+        ease: 'power2.out',
+        onComplete: () => {
+          screen.style.display = 'none';
+          navTL.play();
+          ballEntrance();
+        }
+      });
+    }
   }
 
   if (!loaderFinished) {
@@ -124,16 +112,11 @@ function tickLoader() {
 requestAnimationFrame(tickLoader);
 
 function updateLoader(percent) {
-  if (percent >= 100) {
-    if (targetTween) {
-      targetTween.kill();
-      targetTween = null;
-    }
-  }
-  loaderTarget = Math.max(loaderTarget, percent);
+  loaderTarget = Math.min(100, Math.max(loaderTarget, percent));
 }
 
-loader.load('/models/basketball.glb', (gltf) => {
+// Load the optimized lightweight basketball model (<1MB)
+loader.load('/models/basketball-final.glb', (gltf) => {
   ball = gltf.scene;
 
   const box = new THREE.Box3().setFromObject(ball);
@@ -158,6 +141,10 @@ loader.load('/models/basketball.glb', (gltf) => {
   });
 
   scene.add(ball);
+
+  // Pre-compile shaders upfront to avoid GPU compiling lag during entry animation
+  renderer.compile(scene, camera);
+
   ballLoaded = true;
   updateLoader(100);
 }, (xhr) => {
